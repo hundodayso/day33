@@ -1,30 +1,45 @@
-from tkinter import *
 import requests
+from datetime import datetime
+
+MY_LAT = 28.950378  # Your latitude
+MY_LONG = -13.744839  # Your longitude
 
 
-def get_quote():
-    data = requests.get(url="https://api.kanye.rest")
-    quote = data.json()["quote"]
-    return quote
+def is_iss_overhead():
+    response = requests.get(url="http://api.open-notify.org/iss-now.json")
+    response.raise_for_status()
+    # data = response.json()
+    data = {'timestamp': 1724491289, 'message': 'success',
+            'iss_position': {'latitude': '24.7221', 'longitude': '-16.2934'}}
+    print(data)
+    x0, y0, x1, y1 = bbox
 
-    #Write your code here.
+    iss_latitude = float(data["iss_position"]["latitude"])
+    iss_longitude = float(data["iss_position"]["longitude"])
 
+    if MY_LAT - 5 <= iss_latitude <= MY_LAT+5 and MY_LONG-5 <= iss_longitude <= MY_LONG+5:
+        print("True!")
+        return True
 
+  # Your position is within +5 or -5 degrees of the ISS position.
 
-window = Tk()
-window.title("Kanye Says...")
-window.config(padx=50, pady=50)
+#print(isin_box(iss_latitude, iss_longitude, (MY_LAT - 5, MY_LONG - 5, MY_LAT + 5, MY_LONG + 5)))
 
-canvas = Canvas(width=300, height=414)
-background_img = PhotoImage(file="background.png")
-canvas.create_image(150, 207, image=background_img)
-quote_text = canvas.create_text(150, 207, text="Kanye Quote Goes HERE", width=250, font=("Arial", 30, "bold"), fill="white")
-canvas.grid(row=0, column=0)
+# parameters = {
+#     "lat": MY_LAT,
+#     "lng": MY_LONG,
+#     "formatted": 0,
+# }
 
-kanye_img = PhotoImage(file="kanye.png")
-kanye_button = Button(image=kanye_img, highlightthickness=0, command=get_quote)
-kanye_button.grid(row=1, column=0)
+# response = requests.get("https://api.sunrise-sunset.org/json", params=parameters)
+# response.raise_for_status()
+# data = response.json()
+# sunrise = int(data["results"]["sunrise"].split("T")[1].split(":")[0])
+# sunset = int(data["results"]["sunset"].split("T")[1].split(":")[0])
+#
+# time_now = datetime.now()
 
-
-
-window.mainloop()
+# If the ISS is close to my current position
+# and it is currently dark
+# Then send me an email to tell me to look up.
+# BONUS: run the code every 60 seconds.
