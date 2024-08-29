@@ -12,7 +12,6 @@ def is_iss_overhead():
     data = {'timestamp': 1724491289, 'message': 'success',
             'iss_position': {'latitude': '24.7221', 'longitude': '-16.2934'}}
     print(data)
-    x0, y0, x1, y1 = bbox
 
     iss_latitude = float(data["iss_position"]["latitude"])
     iss_longitude = float(data["iss_position"]["longitude"])
@@ -21,24 +20,31 @@ def is_iss_overhead():
         print("True!")
         return True
 
-  # Your position is within +5 or -5 degrees of the ISS position.
+def is_night():
 
-#print(isin_box(iss_latitude, iss_longitude, (MY_LAT - 5, MY_LONG - 5, MY_LAT + 5, MY_LONG + 5)))
+    parameters = {
+        "lat": MY_LAT,
+        "lng": MY_LONG,
+        "formatted": 0,
+    }
 
-# parameters = {
-#     "lat": MY_LAT,
-#     "lng": MY_LONG,
-#     "formatted": 0,
-# }
+    response = requests.get("https://api.sunrise-sunset.org/json", params=parameters)
+    response.raise_for_status()
+    data = response.json()
+    sunrise = int(data["results"]["sunrise"].split("T")[1].split(":")[0])
+    sunset = int(data["results"]["sunset"].split("T")[1].split(":")[0])
+    hour_now = datetime.now().hour
+    if sunset >= hour_now <= sunrise:
+        print("it's night")
+        return True
 
-# response = requests.get("https://api.sunrise-sunset.org/json", params=parameters)
-# response.raise_for_status()
-# data = response.json()
-# sunrise = int(data["results"]["sunrise"].split("T")[1].split(":")[0])
-# sunset = int(data["results"]["sunset"].split("T")[1].split(":")[0])
-#
-# time_now = datetime.now()
 
+if is_iss_overhead() and is_night():
+
+    #send e-mail
+    print("ISS Overhead")
+else:
+    print("it isn't night time!")
 # If the ISS is close to my current position
 # and it is currently dark
 # Then send me an email to tell me to look up.
